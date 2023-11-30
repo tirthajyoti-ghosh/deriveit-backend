@@ -1,13 +1,14 @@
 import fs from 'fs';
-import root from './html';
+import html from './html';
 import qs from './query-selectors';
 
+const root = html('https://deriveit.org/coding/problems');
 
 root.then((root) => {
     const contentModules = root.querySelectorAll(qs.content);
 
     const modules = [];
-    const pages = [ ]
+    const pages = []
 
     for (let i = 0; i < contentModules.length; i++) {
         const module = contentModules[i];
