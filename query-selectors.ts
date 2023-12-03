@@ -9,4 +9,5 @@ export default {
     problem: '.deriveit-Paper-root.deriveit-1cbej8i',
     problemName: '.deriveit-6wi9fs a.deriveit-1cd7uzt',
     problemInfo: '.deriveit-6wi9fs .deriveit-1b7pcxw',
+    pageContent: '#__next > div.width-before-scroll-bar.deriveit-e9zu4n > div > div:last-child'
 }
