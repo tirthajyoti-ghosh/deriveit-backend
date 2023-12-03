@@ -1,16 +1,17 @@
 import { JSDOM } from 'jsdom';
-import https from 'https';
+import axios from 'axios';
 
 async function html(url: string) {   
-    const body = new Promise<string>((resolve, reject) => {
-        https.get(url, (res) => {
-            let data = '';
-            res.on('data', (chunk) => data += chunk);
-            res.on('end', () => resolve(data));
-        }).on('error', reject);
+    const response = await axios.get(url, {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+        },
     });
     
-    return new JSDOM(await body).window.document;
+    const dom = new JSDOM(response.data);
+    const document = dom.window.document;
+
+    return document;
 }
 
 export default html;
