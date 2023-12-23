@@ -9,9 +9,7 @@ async function html(url: string) {
     });
     
     const dom = new JSDOM(response.data);
-    const document = dom.window.document;
-
-    return document;
+    return dom.window.document;
 }
 
 export default html;

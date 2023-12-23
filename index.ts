@@ -20,6 +20,7 @@ root.then((root) => {
         const submodules = module.querySelectorAll(qs.submodule);
         for (let j = 0; j < submodules.length; j++) {
             const chaptersArr = [];
+
             const submodule = submodules[j];
             const submoduleHeading = submodule.querySelector(qs.submoduleHeading)?.textContent;
             const submoduleHeadingDesc = submodule.querySelector(qs.submoduleHeadingDesc)?.textContent;
@@ -28,29 +29,29 @@ root.then((root) => {
             const chapters = submodule.querySelectorAll(qs.chapter);
             for (let k = 0; k < chapters.length; k++) {
                 const problemsArr = [];
-                const chapter = chapters[k];
-                const chapterHeading = chapter.querySelector(qs.chapterHeading)?.textContent;
-                const chapterLink = chapter.querySelector(qs.chapterHeading)?.getAttribute('href');
 
-                pages.push(chapterLink);
+                const chapter = chapters[k];
+                const chapterHeading = chapter.firstChild?.textContent;
+                const chapterLink = chapter.children[0].querySelector('a')?.getAttribute('href');
+
+                pages.push(chapterLink); // ------- Add chapter link to pages array -------
 
                 const problems = chapter.querySelectorAll(qs.problem);
-                for (let l = 0; l < problems.length; l++) {
+                for (let l = 1; l < problems.length; l++) { // ---------- 0th position has chapter heading ----------
                     const problem = problems[l];
+
                     const problemName = problem.querySelector(qs.problemName)?.textContent;
-                    const problemLink = problem.querySelector(qs.problemName)?.getAttribute('href');
+                    const problemLink = problem.querySelector(qs.problemLink)?.getAttribute('href');
                     const isProblemB75 = problem.querySelector(qs.problemInfo)?.textContent?.includes('B75');
                     const problemLevel = problem.querySelector(qs.problemInfo)?.textContent?.toLowerCase().match(/easy|medium|hard/)?.[0];
-                    const problemLeetcodeLink = problem.querySelector(qs.problemInfo)?.querySelector('a')?.getAttribute('href');
 
-                    pages.push(problemLink);
+                    pages.push(problemLink); // ------- Add problem link to pages array -------
 
                     problemsArr.push({
                         name: problemName,
                         link: problemLink,
                         isB75: isProblemB75,
                         level: problemLevel,
-                        leetcodeLink: problemLeetcodeLink,
                     })
                 }
 
