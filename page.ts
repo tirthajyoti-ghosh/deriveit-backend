@@ -1,19 +1,116 @@
 import fs from 'fs';
-import html from './html';
+import puppeteer, { Browser } from 'puppeteer';
 import qs from './query-selectors';
 
-const pages = JSON.parse(fs.readFileSync('./content/pages.json', 'utf-8'));
+// const pages = JSON.parse(fs.readFileSync('./content/pages.json', 'utf-8'));
 
 // Promise.all(pages.map(async (page: string) => {
 //     const document = await html(`https://www.deriveit.org${page}`);
 //     const content = document.querySelector(qs.pageContent)?.innerHTML;
 // }));
 
-html(`https://www.deriveit.org${pages[0]}`).then((document) => {
-    const data = document.querySelector(qs.pageContent + ' > div:first-child');
+// html(`https://www.deriveit.org${pages[0]}`).then((document) => {
+//     const data = document.querySelector(qs.pageContent + ' > div:first-child');
 
-    const heading = data?.querySelector('h1');
-    const isConcept = data?.textContent?.includes('Concept');
+//     const heading = data?.querySelector('h1');
+//     const isConcept = data?.textContent?.includes('Concept');
 
-    const content = data?.querySelector('article');
-});
+//     const content = data?.querySelector('article');
+// });
+
+let browser: Browser | undefined;
+
+(async () => {
+    // Launch the browser and open a new blank page
+    browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    // Navigate the page to a URL
+    await page.goto('https://deriveit.org/coding/recursion/215');
+
+    // Set screen size
+    await page.setViewport({ width: 1080, height: 1024 });
+
+    // wait for '.monaco-editor .view-lines' and print inner html of '#__next > div.width-before-scroll-bar.deriveit-e9zu4n > div > div.deriveit-1sb5885 > div.deriveit-em6nbc'
+
+    await page.waitForSelector('.monaco-editor .view-lines');
+
+    page.on('console', async (msg) => {
+        const msgArgs = msg.args();
+        for (let i = 0; i < msgArgs.length; ++i) {
+            console.log(await msgArgs[i].jsonValue());
+        }
+    });
+
+    const content = await page.evaluate((qs) => {
+        const data = document.querySelector(qs.pageContent);
+        const heading = data?.querySelector('h1');
+        const isConcept = data?.textContent?.includes('Concept');
+
+        const content = data?.querySelector('article');
+
+        const problemSection = content?.querySelector(qs.problemContent);
+        let solutionSection = content?.querySelector(qs.solutionContent);
+        
+        if (problemSection) content?.removeChild(problemSection);
+        if (solutionSection) content?.removeChild(solutionSection);
+
+        solutionSection = solutionSection?.querySelector('div:last-child'); // select the actual solution content
+
+        const children = content?.children;
+
+        if (!children) return;
+
+        const getExtractedContent = (children: HTMLCollection) => {
+            const contentArr = [];
+            for (let i = 0; i < children?.length; i++) {
+                const content = {
+                    position: i + 1,
+                    type: '',
+                    html: '',
+                }
+        
+                if (children[i].classList.value.includes(qs.katexContent.replace('.', ''))) {
+                    content['type'] = 'katex';
+                    content['html'] = children[i].outerHTML;
+                } else if (children[i].classList.value.includes(qs.codeContent.replace('.', ''))) {
+                    content['type'] = 'code';
+                    content['html'] = children[i].outerHTML;
+                } else {
+                    content['type'] = 'content';
+                    content['html'] = children[i].outerHTML;
+                }
+        
+                contentArr.push(content);
+            }
+        
+            return contentArr;
+        };
+
+        const contentArr = getExtractedContent(children);
+
+        const problemContentArr = problemSection ? getExtractedContent(problemSection.children) : [];
+        const solutionContentArr = solutionSection ? getExtractedContent(solutionSection.children) : [];
+
+        return {
+            heading: heading?.innerHTML,
+            isConcept,
+            content: contentArr,
+            problem: problemContentArr,
+            solution: solutionContentArr,
+        };
+
+    }, qs);
+
+    await new Promise((resolve) => {
+        resolve(
+            fs.writeFileSync('./content/215.json', JSON.stringify(content))
+        );
+    });
+})()
+    .catch((err) => {
+        console.error(err);
+    })
+    .finally(() => {
+        browser?.close();
+    });
