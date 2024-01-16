@@ -26,7 +26,7 @@ let browser: Browser | undefined;
     const page = await browser.newPage();
 
     // Navigate the page to a URL
-    await page.goto('https://deriveit.org/coding/recursion/215');
+    await page.goto('https://deriveit.org/coding/recursion/137');
 
     // Set screen size
     await page.setViewport({ width: 1080, height: 1024 });
@@ -61,27 +61,46 @@ let browser: Browser | undefined;
 
         if (!children) return;
 
+        let position = 1;
+
         const getExtractedContent = (children: HTMLCollection) => {
             const contentArr = [];
             for (let i = 0; i < children?.length; i++) {
                 const content = {
-                    position: i + 1,
+                    position,
                     type: '',
-                    html: '',
+                    data: '',
                 }
         
                 if (children[i].classList.value.includes(qs.katexContent.replace('.', ''))) {
                     content['type'] = 'katex';
-                    content['html'] = children[i].outerHTML;
+                    content['data'] = children[i].outerHTML;
                 } else if (children[i].classList.value.includes(qs.codeContent.replace('.', ''))) {
                     content['type'] = 'code';
-                    content['html'] = children[i].outerHTML;
+                    let code = '';
+                    children[i].querySelector(qs.codeLines)?.childNodes.forEach((node) => {
+                        code = code + node.textContent + '\n';
+                    });
+                    content['data'] = code;
+                } else if (children[i].querySelector('img')) {
+                    const images = children[i].querySelectorAll('img');
+                    images.forEach((image) => {
+                        contentArr.push({
+                            position,
+                            type: 'image',
+                            data: image.getAttribute('src') || '',
+                        });
+                        position++;
+                    });
+                    
+                    continue;
                 } else {
                     content['type'] = 'content';
-                    content['html'] = children[i].outerHTML;
+                    content['data'] = children[i].outerHTML;
                 }
         
                 contentArr.push(content);
+                position++;
             }
         
             return contentArr;
@@ -104,7 +123,7 @@ let browser: Browser | undefined;
 
     await new Promise((resolve) => {
         resolve(
-            fs.writeFileSync('./content/215.json', JSON.stringify(content))
+            fs.writeFileSync('./content/recursion-137.json', JSON.stringify(content))
         );
     });
 })()
