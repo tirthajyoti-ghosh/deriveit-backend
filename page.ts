@@ -26,7 +26,7 @@ let browser: Browser | undefined;
     const page = await browser.newPage();
 
     // Navigate the page to a URL
-    await page.goto('https://deriveit.org/coding/recursion/137');
+    await page.goto('https://deriveit.org/coding/recursion/145');
 
     // Set screen size
     await page.setViewport({ width: 1080, height: 1024 });
@@ -79,7 +79,7 @@ let browser: Browser | undefined;
                     content['type'] = 'code';
                     let code = '';
                     children[i].querySelector(qs.codeLines)?.childNodes.forEach((node) => {
-                        code = code + node.textContent + '\n';
+                        code += node.textContent?.replace(/\u00A0/g, " ") + '\n';
                     });
                     content['data'] = code;
                 } else if (children[i].querySelector('img')) {
@@ -123,7 +123,7 @@ let browser: Browser | undefined;
 
     await new Promise((resolve) => {
         resolve(
-            fs.writeFileSync('./content/recursion-137.json', JSON.stringify(content))
+            fs.writeFileSync('./content/recursion-145.json', JSON.stringify(content))
         );
     });
 })()
