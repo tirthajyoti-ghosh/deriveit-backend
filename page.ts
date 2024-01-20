@@ -26,7 +26,7 @@ let browser: Browser | undefined;
     const page = await browser.newPage();
 
     // Navigate the page to a URL
-    await page.goto('https://deriveit.org/coding/recursion/145');
+    await page.goto('https://deriveit.org/coding/data-structures/252');
 
     // Set screen size
     await page.setViewport({ width: 1080, height: 1024 });
@@ -74,7 +74,18 @@ let browser: Browser | undefined;
         
                 if (children[i].classList.value.includes(qs.katexContent.replace('.', ''))) {
                     content['type'] = 'katex';
-                    content['data'] = children[i].outerHTML;
+                    const katexMRow = children[i].querySelector(qs.katexText)?.querySelectorAll('mrow');
+                    const katexText: string[] = [];
+                    katexMRow?.forEach((mrow) => {
+                        if (mrow.children[0] && mrow.children[0].tagName === 'mtext') {
+                            let text = '';
+                            mrow.querySelectorAll('mtext').forEach((mtext) => {
+                                text += mtext.textContent?.replace(/\u00A0/g, " ") || '';
+                            });
+                            katexText.push(text);
+                        }
+                    })
+                    content['data'] = katexText.join('\n');
                 } else if (children[i].classList.value.includes(qs.codeContent.replace('.', ''))) {
                     content['type'] = 'code';
                     let code = '';
@@ -123,7 +134,7 @@ let browser: Browser | undefined;
 
     await new Promise((resolve) => {
         resolve(
-            fs.writeFileSync('./content/recursion-145.json', JSON.stringify(content))
+            fs.writeFileSync('./content/data-structures-252.json', JSON.stringify(content))
         );
     });
 })()

@@ -13,6 +13,7 @@ export default {
     problemContent: '.deriveit-4k7pxf',
     solutionContent: '.deriveit-18zgjb5',
     katexContent: '.deriveit-1deqy7c',
+    katexText: '.katex-mathml',
     codeContent: '.deriveit-1ukg7ku',
     codeLines: '.view-lines',
 }
