@@ -107,7 +107,15 @@ let browser: Browser | undefined;
                     continue;
                 } else {
                     content['type'] = 'content';
-                    content['data'] = children[i].outerHTML;
+                    const katexSpans = children[i].querySelectorAll(qs.inlineKatex);
+                    katexSpans.forEach((span) => {
+                        const katexSpan = document.createElement('span');
+                        katexSpan.className = 'katex';
+                        katexSpan.textContent = span.querySelector('.katex-html')?.textContent?.replace(/\u00A0/g, " ") || '';
+
+                        span.parentNode?.replaceChild(katexSpan, span);
+                    });
+                    content['data'] = children[i].innerHTML;
                 }
         
                 contentArr.push(content);

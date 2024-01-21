@@ -14,6 +14,7 @@ export default {
     solutionContent: '.deriveit-18zgjb5',
     katexContent: '.deriveit-1deqy7c',
     katexText: '.katex-mathml',
+    inlineKatex: '[data-testid="react-katex"]',
     codeContent: '.deriveit-1ukg7ku',
     codeLines: '.view-lines',
 }
