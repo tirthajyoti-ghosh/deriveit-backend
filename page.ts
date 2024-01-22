@@ -26,21 +26,12 @@ let browser: Browser | undefined;
     const page = await browser.newPage();
 
     // Navigate the page to a URL
-    await page.goto('https://deriveit.org/coding/data-structures/252');
+    await page.goto('https://deriveit.org/coding/data-structures/252', {
+        waitUntil: "domcontentloaded",
+    });
 
     // Set screen size
     await page.setViewport({ width: 1080, height: 1024 });
-
-    // wait for '.monaco-editor .view-lines' and print inner html of '#__next > div.width-before-scroll-bar.deriveit-e9zu4n > div > div.deriveit-1sb5885 > div.deriveit-em6nbc'
-
-    await page.waitForSelector('.monaco-editor .view-lines');
-
-    page.on('console', async (msg) => {
-        const msgArgs = msg.args();
-        for (let i = 0; i < msgArgs.length; ++i) {
-            console.log(await msgArgs[i].jsonValue());
-        }
-    });
 
     const content = await page.evaluate((qs) => {
         const data = document.querySelector(qs.pageContent);
@@ -51,7 +42,7 @@ let browser: Browser | undefined;
 
         const problemSection = content?.querySelector(qs.problemContent);
         let solutionSection = content?.querySelector(qs.solutionContent);
-        
+
         if (problemSection) content?.removeChild(problemSection);
         if (solutionSection) content?.removeChild(solutionSection);
 
@@ -71,7 +62,7 @@ let browser: Browser | undefined;
                     type: '',
                     data: '',
                 }
-        
+
                 if (children[i].classList.value.includes(qs.katexContent.replace('.', ''))) {
                     content['type'] = 'katex';
                     const katexMRow = children[i].querySelector(qs.katexText)?.querySelectorAll('mrow');
@@ -103,7 +94,7 @@ let browser: Browser | undefined;
                         });
                         position++;
                     });
-                    
+
                     continue;
                 } else {
                     content['type'] = 'content';
@@ -115,13 +106,13 @@ let browser: Browser | undefined;
 
                         span.parentNode?.replaceChild(katexSpan, span);
                     });
-                    content['data'] = children[i].innerHTML;
+                    content['data'] = children[i].outerHTML.replace(/\u00A0/g, " ");
                 }
-        
+
                 contentArr.push(content);
                 position++;
             }
-        
+
             return contentArr;
         };
 
