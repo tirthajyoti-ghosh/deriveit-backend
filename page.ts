@@ -26,12 +26,16 @@ let browser: Browser | undefined;
     const page = await browser.newPage();
 
     // Navigate the page to a URL
-    await page.goto('https://deriveit.org/coding/data-structures/252', {
+    await page.goto('https://deriveit.org/coding/recursion/145', {
         waitUntil: "domcontentloaded",
     });
 
     // Set screen size
     await page.setViewport({ width: 1080, height: 1024 });
+
+    if (await page.$(qs.codeContent)) {
+        await page.waitForSelector('.monaco-editor .view-lines');
+    }
 
     const content = await page.evaluate((qs) => {
         const data = document.querySelector(qs.pageContent);
@@ -155,7 +159,7 @@ let browser: Browser | undefined;
 
     await new Promise((resolve) => {
         resolve(
-            fs.writeFileSync('./content/data-structures-252.json', JSON.stringify(content))
+            fs.writeFileSync('./content/recursion-145.json', JSON.stringify(content))
         );
     });
 })()
