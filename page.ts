@@ -48,9 +48,31 @@ let browser: Browser | undefined;
 
         solutionSection = solutionSection?.querySelector('div:last-child'); // select the actual solution content
 
-        const children = content?.children;
+        if (!content?.children) return;
 
-        if (!children) return;
+        const flattenSubsections = (section: Element) => {
+            const elements = Array.from(section.querySelectorAll(qs.subsection));
+
+            let nodesToMove = [];
+
+            for (let element of elements) {
+                const children = Array.from(element.children);
+
+                for (let child of children) {
+                    if (!child.classList.value.includes(qs.subsection.replace('div.', ''))) {
+                        nodesToMove.push(child);
+                    }
+                }
+
+                element.remove()
+            }
+
+            for (let node of nodesToMove) {
+                section.appendChild(node);
+            }
+
+            return section;
+        }
 
         let position = 1;
 
@@ -116,10 +138,10 @@ let browser: Browser | undefined;
             return contentArr;
         };
 
-        const contentArr = getExtractedContent(children);
+        const contentArr = getExtractedContent(flattenSubsections(content).children);
 
-        const problemContentArr = problemSection ? getExtractedContent(problemSection.children) : [];
-        const solutionContentArr = solutionSection ? getExtractedContent(solutionSection.children) : [];
+        const problemContentArr = problemSection ? getExtractedContent(flattenSubsections(problemSection).children) : [];
+        const solutionContentArr = solutionSection ? getExtractedContent(flattenSubsections(solutionSection).children) : [];
 
         return {
             heading: heading?.innerHTML,
