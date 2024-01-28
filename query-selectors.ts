@@ -10,7 +10,7 @@ export default {
     problemLink: 'a.deriveit-1cd7uzt',
     problemInfo: '.deriveit-1b7pcxw',
     pageContent: '#__next > div.width-before-scroll-bar.deriveit-e9zu4n > div > div.deriveit-1sb5885 > div.deriveit-em6nbc',
-    subsection: 'div.deriveit-1avyp1d',
+    subsection: 'div.deriveit-1avyp1d[id]',
     problemContent: '.deriveit-4k7pxf',
     solutionContent: '.deriveit-18zgjb5',
     katexContent: '.deriveit-1deqy7c',
@@ -18,4 +18,6 @@ export default {
     inlineKatex: '[data-testid="react-katex"]',
     codeContent: '.deriveit-1ukg7ku',
     codeLines: '.view-lines',
+    spoilerSection: '.deriveit-n8y7xk',
+    spoilerContent: '.deriveit-c3abjw',
 }

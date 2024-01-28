@@ -26,7 +26,7 @@ let browser: Browser | undefined;
     const page = await browser.newPage();
 
     // Navigate the page to a URL
-    await page.goto('https://deriveit.org/coding/recursion/145', {
+    await page.goto('https://deriveit.org/coding/recursion/151', {
         waitUntil: "domcontentloaded",
     });
 
@@ -55,33 +55,23 @@ let browser: Browser | undefined;
         if (!content?.children) return;
 
         const flattenSubsections = (section: Element) => {
-            const elements = Array.from(section.querySelectorAll(qs.subsection));
-
-            let nodesToMove = [];
-
-            for (let element of elements) {
-                const children = Array.from(element.children);
-
-                for (let child of children) {
-                    if (!child.classList.value.includes(qs.subsection.replace('div.', ''))) {
-                        nodesToMove.push(child);
-                    }
-                }
-
-                element.remove()
+            const subsection = section?.querySelector(qs.subsection);
+            if (subsection) {
+                flattenSubsections(subsection);
             }
 
-            for (let node of nodesToMove) {
-                section.appendChild(node);
+            const children = Array.from(section.children);
+            for (let child of children) {
+                section.parentNode?.insertBefore(child, section);
             }
 
-            return section;
+            return section.parentNode?.children;
         }
 
         let position = 1;
 
         const getExtractedContent = (children: HTMLCollection) => {
-            const contentArr = [];
+            const contentArr: { position: number, type: string, data: string }[] = [];
             for (let i = 0; i < children?.length; i++) {
                 const content = {
                     position,
@@ -89,7 +79,12 @@ let browser: Browser | undefined;
                     data: '',
                 }
 
-                if (children[i].classList.value.includes(qs.katexContent.replace('.', ''))) {
+                const isKatexSection = children[i].classList.value.includes(qs.katexContent.replace('.', ''));
+                const isCodeSection = children[i].classList.value.includes(qs.codeContent.replace('.', ''));
+                const isSpoilerSection = children[i].classList.value.includes(qs.spoilerSection.replace('.', ''));
+                const isImageSection = children[i].querySelector('img');
+
+                if (isKatexSection) {
                     content['type'] = 'katex';
                     const katexMRow = children[i].querySelector(qs.katexText)?.querySelectorAll('mrow');
                     const katexText: string[] = [];
@@ -103,14 +98,19 @@ let browser: Browser | undefined;
                         }
                     })
                     content['data'] = katexText.join('\n');
-                } else if (children[i].classList.value.includes(qs.codeContent.replace('.', ''))) {
+                } else if (isCodeSection) {
                     content['type'] = 'code';
                     let code = '';
                     children[i].querySelector(qs.codeLines)?.childNodes.forEach((node) => {
                         code += node.textContent?.replace(/\u00A0/g, " ") + '\n';
                     });
                     content['data'] = code;
-                } else if (children[i].querySelector('img')) {
+                } else if (isSpoilerSection) {
+                    const spoilerContent = children[i].querySelector(qs.spoilerContent);
+                    const spoilerContentArr = spoilerContent ? getExtractedContent(spoilerContent.children) : [];
+                    contentArr.push(...spoilerContentArr);
+                    continue;
+                } else if (isImageSection) {
                     const images = children[i].querySelectorAll('img');
                     images.forEach((image) => {
                         contentArr.push({
@@ -142,10 +142,24 @@ let browser: Browser | undefined;
             return contentArr;
         };
 
-        const contentArr = getExtractedContent(flattenSubsections(content).children);
+        const subsection = content.querySelector(qs.subsection);
+        const contentArr = subsection
+            ? getExtractedContent((flattenSubsections(subsection)) as HTMLCollection)
+            : getExtractedContent(content?.children);
 
-        const problemContentArr = problemSection ? getExtractedContent(flattenSubsections(problemSection).children) : [];
-        const solutionContentArr = solutionSection ? getExtractedContent(flattenSubsections(solutionSection).children) : [];
+        const problemSubsection = problemSection?.querySelector(qs.subsection);
+        const problemContentArr = problemSubsection
+            ? getExtractedContent((flattenSubsections(problemSubsection)) as HTMLCollection)
+            : problemSection
+                ? getExtractedContent(problemSection.children)
+                : [];
+
+        const solutionSubsection = solutionSection?.querySelector(qs.subsection);
+        const solutionContentArr = solutionSubsection
+            ? getExtractedContent((flattenSubsections(solutionSubsection)) as HTMLCollection)
+            : solutionSection
+                ? getExtractedContent(solutionSection.children)
+                : [];
 
         return {
             heading: heading?.innerHTML,
@@ -159,7 +173,7 @@ let browser: Browser | undefined;
 
     await new Promise((resolve) => {
         resolve(
-            fs.writeFileSync('./content/recursion-145.json', JSON.stringify(content))
+            fs.writeFileSync('./content/recursion-151.json', JSON.stringify(content))
         );
     });
 })()
